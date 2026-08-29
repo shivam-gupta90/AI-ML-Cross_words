@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI/ML & CSE Crossword Challenge | Engineering Day 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/crossword.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+</head>
+<body class="theme-tech">
+    <!-- Background Animated Canvas & Grid Overlay -->
+    <div class="cyber-bg-grid"></div>
+    <canvas id="confetti-canvas"></canvas>
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 1: LANDING & START CHALLENGE                       -->
+    <!-- ========================================================= -->
+    <div id="screen-start" class="app-screen active">
+        <div class="landing-container">
+            <header class="landing-header">
+                <div class="event-badge">
+                    <span class="pulse-dot"></span>
+                    ENGINEERING DAY 2026 &bull; MULTI-TRACK TOURNAMENT
+                </div>
+                <h1 class="main-title">
+                    <span class="text-glow-cyan">ENGINEERING</span> CROSSWORD
+                </h1>
+                <p class="subtitle">
+                    AI/ML &bull; Data Science &bull; Internet of Things &bull; Core CSE
+                </p>
+            </header>
+
+            <!-- Category Pills Bar -->
+            <div class="category-pills-bar">
+                <span class="cat-pill cat-aiml">🤖 AI / ML</span>
+                <span class="cat-pill cat-ds">📊 Data Science</span>
+                <span class="cat-pill cat-iot">📡 IoT</span>
+                <span class="cat-pill cat-cse">💻 Core CSE</span>
+            </div>
+
+            <!-- Specs Bar -->
+            <div class="specs-bar">
+                <div class="spec-item">
+                    <span class="spec-icon">📐</span>
+                    <span class="spec-val">15 &times; 15</span>
+                    <span class="spec-label">Matrix Grid</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">❓</span>
+                    <span class="spec-val">10 Words</span>
+                    <span class="spec-label">Questions</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">⏱</span>
+                    <span class="spec-val">10 Mins</span>
+                    <span class="spec-label">Countdown</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-icon">🎯</span>
+                    <span class="spec-val">10 Tries</span>
+                    <span class="spec-label">Max Attempts</span>
+                </div>
+            </div>
+
+            <!-- Start Form Card -->
+            <div class="start-card glass-panel">
+                <div class="form-group">
+                    <label for="player-name-input" class="form-label">
+                        <span class="label-icon">👤</span> Enter Student / Team Name
+                    </label>
+                    <input type="text" id="player-name-input" class="input-cyber" placeholder="e.g. Alex Chen / Matrix Solvers" maxlength="50" autocomplete="off" />
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="select-puzzle" class="form-label">
+                            <span class="label-icon">🧩</span> Select Tournament Challenge (10 Questions)
+                        </label>
+                        <select id="select-puzzle" class="select-cyber">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="select-difficulty" class="form-label">
+                            <span class="label-icon">⚡</span> Difficulty Mode
+                        </label>
+                        <select id="select-difficulty" class="select-cyber">
+                            <option value="Hard" selected>🔥 Hard (~20% letters revealed)</option>
+                            <option value="Medium">⚡ Medium (~35% letters revealed)</option>
+                            <option value="Easy">🌱 Easy (~55% letters revealed)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="selected-puzzle-desc" class="puzzle-description-box">
+                    Loading challenge specifications...
+                </div>
+
+                <button id="btn-start-challenge" class="btn btn-primary btn-launch">
+                    START 10-QUESTION CHALLENGE (10 MINS &bull; 10 TRIES) 🚀
+                </button>
+            </div>
+
+            <!-- Action Navigation -->
+            <div class="landing-actions">
+                <button id="btn-view-instructions" class="btn btn-secondary">
+                    <span>📖</span> How To Play
+                </button>
+                <button id="btn-view-leaderboard" class="btn btn-secondary">
+                    <span>🏆</span> Leaderboard
+                </button>
+                <button id="btn-open-admin" class="btn btn-secondary btn-ghost">
+                    <span>⚙️</span> Organizer Admin
+                </button>
+            </div>
+
+            <footer class="landing-footer">
+                <div class="rule-highlight">
+                    <span class="badge-tip">GAME RULE</span>
+                    Type the <strong>complete word/phrase</strong> into one input box. No tedious cell-by-cell typing!
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SCREEN 2: GAMEPLAY ARENA                                  -->
+    <!-- ========================================================= -->
+    <div id="screen-game" class="app-screen">
+        <!-- Top HUD Navigation Bar -->
+        <header class="game-hud glass-panel">
+            <div class="hud-left">
+                <div class="hud-brand">
+                    <span class="hud-logo-glow">⚡</span>
+                    <div>
+                        <div id="hud-puzzle-title" class="hud-puzzle-name">Engineering Crossword</div>
+                        <div id="hud-player-name" class="hud-player-tag">Player</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-center">
+                <div class="hud-stat-box timer-box">
+                    <span class="hud-label">⏱ TIME LEFT</span>
+                    <span id="hud-timer" class="hud-value font-mono">10:00</span>
+                </div>
+                <div class="hud-stat-box attempts-box">
+                    <span class="hud-label">🎯 ATTEMPTS</span>
+                    <span id="hud-attempts" class="hud-value font-mono">10 / 10</span>
+                </div>
+                <div class="hud-stat-box hints-box">
+                    <span class="hud-label">💡 HINTS</span>
+                    <span id="hud-hints" class="hud-value font-mono">3 / 3</span>
+                </div>
+                <div class="hud-stat-box score-box">
+                    <span class="hud-label">🏆 SCORE</span>
+                    <span id="hud-score" class="hud-value font-mono text-cyan">0</span>
+                </div>
+            </div>
+
+            <div class="hud-right">
+                <button id="btn-toggle-audio" class="hud-btn" title="Toggle Sound">
+                    <span>🔊</span> Sound ON
+                </button>
+                <button id="nav-btn-instructions" class="hud-btn" title="View Instructions">
+                    <span>📖</span> Rules
+                </button>
+                <button id="nav-btn-leaderboard" class="hud-btn" title="Live Leaderboard">
+                    <span>🏆</span> Board
+                </button>
+                <button id="nav-btn-quit" class="hud-btn hud-btn-danger" title="Quit to Menu">
+                    <span>✕</span> Exit
+                </button>
+            </div>
+        </header>
+
+        <!-- Progress Indicator -->
+        <div class="progress-bar-container">
+            <div class="progress-track">
+                <div id="hud-progress-bar" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div id="hud-progress-text" class="progress-label">0 / 10 Solved (0%)</div>
+        </div>
+
+        <!-- Main Arena Grid Layout -->
+        <main class="arena-layout">
+            <!-- Left Column: 15x15 Crossword Grid -->
+            <section class="grid-section glass-panel">
+                <div class="grid-wrapper">
+                    <div id="crossword-grid" class="crossword-board">
+                        <!-- Rendered by crossword.js -->
+                    </div>
+                </div>
+                <div class="grid-footer-tips">
+                    <span>💡 Tip: Click any cell or clue to select a word. Spacebar toggles Across/Down.</span>
+                </div>
+            </section>
+
+            <!-- Right Column: Active Clue & Unified Answer Submission -->
+            <section class="sidebar-section">
+                <!-- Active Clue Card -->
+                <div class="active-clue-card glass-panel">
+                    <div class="active-clue-header">
+                        <div class="clue-tag-group">
+                            <span id="active-clue-num" class="badge-clue-num">#1</span>
+                            <span id="active-clue-dir" class="badge-direction">ACROSS</span>
+                            <span id="active-clue-category" class="badge-category">AI / ML</span>
+                        </div>
+                        <span id="active-clue-length" class="badge-length">10 letters</span>
+                    </div>
+
+                    <div id="active-clue-text" class="active-clue-body">
+                        Select a word on the grid or from the list below to view its concept clue.
+                    </div>
+
+                    <div class="masked-pattern-container">
+                        <div class="pattern-label">CURRENT PATTERN:</div>
+                        <div id="active-masked-pattern" class="masked-pattern-text font-mono">
+                            _ _ _ _ _ _ _ _ _ _
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unified Answer Submission Card -->
+                <div class="answer-box-card glass-panel">
+                    <label for="answer-input" class="answer-box-label">
+                        <span>⌨️</span> ENTER COMPLETE ANSWER
+                    </label>
+                    <div class="answer-input-wrapper">
+                        <input type="text" id="answer-input" class="answer-input font-mono" placeholder="Type complete answer here..." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" />
+                    </div>
+
+                    <div class="answer-actions">
+                        <button id="btn-submit-answer" class="btn btn-primary btn-submit font-bold">
+                            SUBMIT ANSWER ↵
+                        </button>
+                        <button id="btn-use-hint" class="btn btn-hint">
+                            <span id="hint-btn-text">💡 Use Hint (3 left)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Clue Tabs & Lists -->
+                <div class="clues-browser glass-panel">
+                    <div class="clues-tab-nav">
+                        <button class="clue-tab-btn active" data-tab="across">
+                            Across Clues
+                        </button>
+                        <button class="clue-tab-btn" data-tab="down">
+                            Down Clues
+                        </button>
+                    </div>
+
+                    <div class="clues-tab-content">
+                        <div id="clues-across-list" class="clues-scroll-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div id="clues-down-list" class="clues-scroll-list hidden">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: HOW TO PLAY / INSTRUCTIONS                         -->
+    <!-- ========================================================= -->
+    <div id="modal-instructions" class="modal-overlay">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card glass-panel">
+            <div class="modal-header">
+                <h2>📖 How To Play & Rules</h2>
+                <button class="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body instructions-content">
+                <div class="rule-card">
+                    <h3>1. 10 Questions across 4 Categories</h3>
+                    <p>Each challenge features <strong>10 interconnected terms</strong> spanning <strong>AI/ML</strong>, <strong>Data Science</strong>, <strong>IoT</strong>, and <strong>Core CSE</strong> on a 15&times;15 crossword grid.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>2. Unified Answer Submission</h3>
+                    <p>You <strong>do not type letters individually into cells</strong>. Type the entire word or phrase into the single answer box below the clue and hit <strong>Submit</strong> or press <strong>Enter</strong>.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>3. Crossing Words & Hidden Letters</h3>
+                    <p>Solving one word reveals letters that intersect with other words across the grid. Use intersections to deduce difficult technical terms!</p>
+                </div>
+                <div class="rule-card">
+                    <h3>4. 10-Minute Timer & 10 Attempts</h3>
+                    <p>You have a <strong>10:00 countdown timer</strong> and <strong>10 attempts</strong>. Each wrong submission deducts an attempt and reduces score by 100 points.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>5. Hint System & Scoring</h3>
+                    <p><strong>Base Score:</strong> +100 per word solved &bull; <strong>Victory Bonus:</strong> +500 &bull; <strong>Time Bonus:</strong> +2 &times; Remaining Seconds &bull; <strong>Hint Penalty:</strong> -50 pts per hint used.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-close-modal">Got It &bull; Let's Play!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: LEADERBOARD                                        -->
+    <!-- ========================================================= -->
+    <div id="modal-leaderboard" class="modal-overlay">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-large glass-panel">
+            <div class="modal-header">
+                <h2>🏆 Tournament Leaderboard</h2>
+                <button class="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Stats Summary -->
+                <div class="lb-stats-bar">
+                    <div class="lb-stat-box">
+                        <span class="lb-stat-label">Total Completions</span>
+                        <span id="lb-stat-completions" class="lb-stat-val">0</span>
+                    </div>
+                    <div class="lb-stat-box">
+                        <span class="lb-stat-label">Highest Score</span>
+                        <span id="lb-stat-highscore" class="lb-stat-val text-cyan">0</span>
+                    </div>
+                    <div class="lb-stat-box">
+                        <span class="lb-stat-label">Current Leader</span>
+                        <span id="lb-stat-top-player" class="lb-stat-val text-gold">None</span>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="lb-filter-row">
+                    <div class="filter-item">
+                        <label>Filter Challenge:</label>
+                        <select id="lb-filter-puzzle" class="select-cyber select-sm">
+                            <option value="">All Challenges</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>Filter Difficulty:</label>
+                        <select id="lb-filter-difficulty" class="select-cyber select-sm">
+                            <option value="">All Difficulties</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Easy">Easy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Table -->
+                <div class="table-responsive">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Student / Team</th>
+                                <th>Challenge</th>
+                                <th>Difficulty</th>
+                                <th>Final Score</th>
+                                <th>Time Taken</th>
+                                <th>Stats</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: WIN / VICTORY CELEBRATION                          -->
+    <!-- ========================================================= -->
+    <div id="modal-win" class="modal-overlay">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-celebrate glass-panel">
+            <div class="celebrate-header">
+                <div class="trophy-icon">🏆</div>
+                <h1 class="win-title text-glow-cyan">CONGRATULATIONS!</h1>
+                <p class="win-subtitle">10/10 Questions Solved &bull; Challenge Completed!</p>
+            </div>
+
+            <div class="win-score-hero">
+                <div class="score-label">FINAL TOURNAMENT SCORE</div>
+                <div id="win-final-score" class="score-number font-mono text-cyan">1,450</div>
+            </div>
+
+            <div class="score-breakdown-card">
+                <div class="bd-row">
+                    <span>Base & Solved Points</span>
+                    <span id="win-base-score" class="text-emerald">+1,500</span>
+                </div>
+                <div class="bd-row">
+                    <span>Time Bonus</span>
+                    <span id="win-time-bonus" class="text-cyan">+350</span>
+                </div>
+                <div class="bd-row">
+                    <span>Wrong Attempt Penalties</span>
+                    <span id="win-attempt-penalty" class="text-danger">-100</span>
+                </div>
+                <div class="bd-row">
+                    <span>Hint Penalties</span>
+                    <span id="win-hint-penalty" class="text-warning">-50</span>
+                </div>
+            </div>
+
+            <div class="win-stats-grid">
+                <div class="win-stat-item">
+                    <span class="w-label">⏱ Time Left</span>
+                    <span id="win-time-remaining" class="w-val">04:12</span>
+                </div>
+                <div class="win-stat-item">
+                    <span class="w-label">🎯 Attempts Used</span>
+                    <span id="win-attempts-used" class="w-val">1 / 10</span>
+                </div>
+                <div class="win-stat-item">
+                    <span class="w-label">💡 Hints Used</span>
+                    <span id="win-hints-used" class="w-val">1 / 3</span>
+                </div>
+            </div>
+
+            <div class="modal-actions-grid">
+                <button id="btn-win-leaderboard" class="btn btn-primary">
+                    🏆 View Event Leaderboard
+                </button>
+                <button id="btn-win-play-again" class="btn btn-secondary">
+                    🔄 Play Another Challenge
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: GAME OVER / TIME UP                                -->
+    <!-- ========================================================= -->
+    <div id="modal-gameover" class="modal-overlay">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card glass-panel text-center">
+            <div class="modal-icon-danger">⚠️</div>
+            <h2 id="gameover-title" class="text-danger font-heading">GAME OVER</h2>
+            <p id="gameover-reason" class="text-muted my-3">You have used all your attempts.</p>
+
+            <div class="gameover-stats-box my-4">
+                <div class="go-stat">
+                    <span>Final Score</span>
+                    <span id="gameover-score" class="font-mono font-bold text-cyan">450</span>
+                </div>
+                <div class="go-stat">
+                    <span>Words Solved</span>
+                    <span id="gameover-solved-count" class="font-mono font-bold text-emerald">6 / 10</span>
+                </div>
+            </div>
+
+            <div class="modal-actions-grid">
+                <button id="btn-gameover-retry" class="btn btn-primary">
+                    🔄 Try New Challenge
+                </button>
+                <button id="btn-gameover-leaderboard" class="btn btn-secondary">
+                    🏆 View Leaderboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL: ORGANIZER ADMIN PANEL                              -->
+    <!-- ========================================================= -->
+    <div id="modal-admin" class="modal-overlay">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-large glass-panel">
+            <div class="modal-header">
+                <h2>⚙️ Event Organizer Admin Panel</h2>
+                <button class="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-actions-bar">
+                    <button id="btn-admin-reset-lb" class="btn btn-danger btn-sm">
+                        🗑 Reset Leaderboard
+                    </button>
+                    <button id="btn-admin-reseed" class="btn btn-secondary btn-sm">
+                        🔄 Re-seed 10-Question Puzzles
+                    </button>
+                    <button id="btn-admin-refresh" class="btn btn-secondary btn-sm">
+                        ⚡ Refresh Sessions
+                    </button>
+                </div>
+
+                <h3 class="my-4 text-sm font-bold text-muted uppercase tracking-wider">Recent Player Sessions</h3>
+                <div class="table-responsive">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Puzzle ID</th>
+                                <th>Difficulty</th>
+                                <th>Status</th>
+                                <th>Score</th>
+                                <th>Solved</th>
+                                <th>Start Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-sessions-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Bundles -->
+    <script src="/static/js/audio.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/crossword.js"></script>
+    <script src="/static/js/game.js"></script>
+    <script src="/static/js/leaderboard.js"></script>
+    <script src="/static/js/admin.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
