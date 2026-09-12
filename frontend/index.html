@@ -118,6 +118,10 @@
                 <button id="btn-open-admin" class="btn btn-secondary btn-ghost">
                     <span>⚙️</span> Organizer Admin
                 </button>
+                <button id="btn-create-room" class="btn btn-primary btn-ghost">
+                    ➕ Create Organizer‑Mode Room
+                </button>
+
             </div>
 
             <footer class="landing-footer">
@@ -478,52 +482,48 @@
     <!-- ========================================================= -->
     <!-- MODAL: ORGANIZER ADMIN PANEL                              -->
     <!-- ========================================================= -->
-    <div id="modal-admin" class="modal-overlay">
+<!-- Organizer Create Room Modal -->
+    <div id="modal-create-room" class="modal-overlay hidden">
         <div class="modal-backdrop"></div>
         <div class="modal-card modal-large glass-panel">
             <div class="modal-header">
-                <h2>⚙️ Event Organizer Admin Panel</h2>
+                <h2>⚙️ Create Organizer‑Mode Room</h2>
                 <button class="btn-close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="admin-actions-bar">
-                    <button id="btn-admin-reset-lb" class="btn btn-danger btn-sm">
-                        🗑 Reset Leaderboard
-                    </button>
-                    <button id="btn-admin-reseed" class="btn btn-secondary btn-sm">
-                        🔄 Re-seed 10-Question Puzzles
-                    </button>
-                    <button id="btn-admin-refresh" class="btn btn-secondary btn-sm">
-                        ⚡ Refresh Sessions
-                    </button>
+                <div class="form-group">
+                    <label>Organizer Name
+                        <input type="text" id="create-organizer-name" placeholder="e.g. Alice" />
+                    </label>
                 </div>
-
-                <h3 class="my-4 text-sm font-bold text-muted uppercase tracking-wider">Recent Player Sessions</h3>
-                <div class="table-responsive">
-                    <table class="leaderboard-table">
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Puzzle ID</th>
-                                <th>Difficulty</th>
-                                <th>Status</th>
-                                <th>Score</th>
-                                <th>Solved</th>
-                                <th>Start Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-sessions-tbody">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
+                <div class="form-group">
+                    <label>Puzzle
+                        <select id="create-puzzle-id"></select>  <!-- populated dynamically -->
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Max Players
+                        <input type="number" id="create-max-players" min="1" value="5" />
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Expiration (seconds)
+                        <input type="number" id="create-expiration" min="60" value="7200" />
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="create-allow-organizer" checked />
+                        Allow organizer to join as a player
+                    </label>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary btn-close-modal">Close</button>
+                <button id="btn-submit-create-room" class="btn btn-primary">Create Room</button>
+                <button class="btn btn-secondary btn-close-modal">Cancel</button>
             </div>
         </div>
     </div>
-
     <!-- Application JavaScript Bundles -->
     <script src="/static/js/audio.js"></script>
     <script src="/static/js/api.js"></script>
@@ -534,3 +534,69 @@
     <script src="/static/js/app.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+<div id="modal-create-room" class="modal-overlay hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card modal-large glass-panel">
+        <div class="modal-header">
+            <h2>⚙️ Create Organizer‑Mode Room</h2>
+            <button class="btn-close-modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Organizer name -->
+            <div class="form-group">
+                <label>
+                    Organizer Name
+                    <input type="text" id="create-organizer-name" placeholder="e.g. Alice" />
+                </label>
+            </div>
+
+            <!-- Puzzle selector (populated by JS) -->
+            <div class="form-group">
+                <label>
+                    Puzzle
+                    <select id="create-puzzle-id"></select>
+                </label>
+            </div>
+
+            <!-- Max players -->
+            <div class="form-group">
+                <label>
+                    Max Players
+                    <input type="number" id="create-max-players" min="1" value="5" />
+                </label>
+            </div>
+
+            <!-- Expiration (seconds) -->
+            <div class="form-group">
+                <label>
+                    Expiration (seconds)
+                    <input type="number" id="create-expiration" min="60" value="7200" />
+                </label>
+            </div>
+
+            <!-- Optional: allow organizer to also play -->
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="create-allow-organizer" checked />
+                    Allow organizer to join as a player
+                </label>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="btn-submit-create-room" class="btn btn-primary">Create Room</button>
+            <button class="btn btn-secondary btn-close-modal">Cancel</button>
+        </div>
+    </div>
+</div>

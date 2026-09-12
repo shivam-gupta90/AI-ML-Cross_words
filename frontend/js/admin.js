@@ -1,4 +1,4 @@
-/**
+/** 
  * Event Organizer / Admin Component
  */
 class AdminManager {
@@ -62,7 +62,7 @@ class AdminManager {
             sessions.forEach(s => {
                 const tr = document.createElement("tr");
                 let statusBadge = `<span class="badge-status badge-${s.status}">${s.status}</span>`;
-                
+
                 tr.innerHTML = `
                     <td class="font-bold">${this.escapeHtml(s.player_name)}</td>
                     <td>${this.escapeHtml(s.puzzle_id)}</td>
@@ -88,3 +88,81 @@ class AdminManager {
 }
 
 window.AdminManager = AdminManager;
+
+// -------------------------------------------------------------------
+// Organizer‑Mode UI helpers (new code)
+// -------------------------------------------------------------------
+
+// Populate the puzzle dropdown from the API
+async function loadPuzzleOptions() {
+    const resp = await fetch("/api/puzzles");
+    if (!resp.ok) {
+        console.error("Failed to load puzzles");
+        return;
+    }
+    const puzzles = await resp.json();
+    const sel = document.getElementById("create-puzzle-id");
+    sel.innerHTML = "";
+    puzzles.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id; // string UUID
+        opt.textContent = `${p.title} (${p.difficulty})`;
+        sel.appendChild(opt);
+    });
+}
+
+// Simple modal helpers (reuse your existing ones if you have them)
+function openModal(id) {
+    document.getElementById(id).classList.remove("hidden");
+}
+function closeModal(id) {
+    document.getElementById(id).classList.add("hidden");
+}
+
+// Event listeners – runs after the page loads
+document.addEventListener("DOMContentLoaded", () => {
+    // 1️⃣ Open Create‑Room modal
+    const btnCreate = document.getElementById("btn-create-room");
+    if (btnCreate) {
+        btnCreate.addEventListener("click", () => {
+            loadPuzzleOptions();               // fetch fresh puzzle list
+            openModal("modal-create-room");    // show the modal
+        });
+    }
+
+    // 2️⃣ Close any modal when a .btn-close-modal element is clicked
+    document.querySelectorAll(".btn-close-modal").forEach(btn => {
+        btn.addEventListener("click", e => {
+            const modal = e.target.closest(".modal-overlay");
+            if (modal) modal.classList.add("hidden");
+        });
+    });
+
+    // 3️⃣ Submit the Create‑Room form
+    const btnSubmit = document.getElementById("btn-submit-create-room");
+    if (btnSubmit) {
+        btnSubmit.addEventListener("click", async () => {
+            const payload = {
+                organizer_name:   document.getElementById("create-organizer-name").value.trim(),
+                puzzle_id:        document.getElementById("create-puzzle-id").value,
+                max_players:      parseInt(document.getElementById("create-max-players").value, 10),
+                expiration:       parseInt(document.getElementById("create-expiration").value, 10),
+                allow_organizer:  document.getElementById("create-allow-organizer").checked
+            };
+
+            const resp = await fetch("/api/rooms/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await resp.json();
+            if (resp.ok) {
+                alert(`Room created!\nJoin code: ${data.join_code}\nOrganizer secret: ${data.organizer_secret}`);
+                closeModal("modal-create-room");
+            } else {
+                alert(`Error creating room:\n${JSON.stringify(data)}`);
+            }
+        });
+    }
+});
