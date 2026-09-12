@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 
 from backend.database import Base, engine, SessionLocal
 from backend.models import Puzzle, Word
-from backend.routes import puzzle, game, leaderboard, admin
+from backend.routes import puzzle, game, leaderboard, admin, rooms
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
@@ -67,7 +67,9 @@ def seed_default_puzzles():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create tables and seed default puzzles
+    # Startup: reset tables and seed default puzzles to ensure schema matches models
+    import backend.models  # ensure all models are registered before metadata creation
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     seed_default_puzzles()
     yield
@@ -93,6 +95,7 @@ app.include_router(puzzle.router)
 app.include_router(game.router)
 app.include_router(leaderboard.router)
 app.include_router(admin.router)
+app.include_router(rooms.router)
 
 @app.get("/api/health")
 def health_check():

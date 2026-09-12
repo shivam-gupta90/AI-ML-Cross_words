@@ -5,6 +5,7 @@ from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+# ─────────────────── Puzzle ────────────────────
 class PuzzleSummary(BaseModel):
     id: str
     title: str
@@ -16,6 +17,7 @@ class PuzzleSummary(BaseModel):
     max_hints: int
     word_count: int
 
+# ─────────────────── Game ──────────────────────
 class StartGameRequest(BaseModel):
     player_name: str = Field(..., min_length=1, max_length=64, description="Student / Team name")
     puzzle_id: str = Field(..., description="Selected puzzle identifier")
@@ -79,6 +81,7 @@ class GameStateResponse(BaseModel):
     words: List[PublicWordClue]
     score_breakdown: Optional[ScoreBreakdown] = None
     created_at: str
+    room_id: Optional[str] = None
 
 class SubmitAnswerResponse(BaseModel):
     correct: bool
@@ -104,6 +107,7 @@ class UseHintResponse(BaseModel):
     remaining_hints: int
     score: int
 
+# ─────────────────── Leaderboard ───────────────
 class LeaderboardItem(BaseModel):
     rank: int
     player_name: str
@@ -117,3 +121,68 @@ class LeaderboardItem(BaseModel):
     words_solved: int
     total_words: int
     completed_at: str
+
+# ─────────────────── Room (Organizer Mode) ─────
+class CreateRoomRequest(BaseModel):
+    organizer_name: str = Field(..., min_length=1, max_length=64, description="Organizer / teacher name")
+    puzzle_id: str = Field(..., description="Puzzle to use for this event")
+    difficulty: Optional[str] = Field("Medium", description="Difficulty for all players")
+    max_players: Optional[int] = Field(50, ge=2, le=200)
+    organizer_can_play: Optional[bool] = Field(False, description="If true, organizer also participates as a player")
+
+class CreateRoomResponse(BaseModel):
+    room_id: str
+    join_code: str           # 6-char uppercase code players enter
+    organizer_secret: str    # UUID token — organizer must keep private for control actions
+    organizer_name: str
+    puzzle_title: str
+    difficulty: str
+    status: str              # "waiting"
+
+class JoinRoomRequest(BaseModel):
+    player_name: str = Field(..., min_length=1, max_length=64)
+
+class JoinRoomResponse(BaseModel):
+    session_id: str
+    player_name: str
+    room_id: str
+    join_code: str
+    puzzle_title: str
+    difficulty: str
+    room_status: str         # "waiting" | "active" | "finished"
+    message: str
+
+class PlayerInRoom(BaseModel):
+    session_id: str
+    player_name: str
+    status: str              # waiting | in_progress | completed | game_over | time_up
+    score: int
+    words_solved: int
+    total_words: int
+    joined_at: str
+
+class RoomInfoResponse(BaseModel):
+    room_id: str
+    join_code: str
+    organizer_name: str
+    puzzle_id: str
+    puzzle_title: str
+    difficulty: str
+    status: str              # waiting | active | finished
+    player_count: int
+    max_players: int
+    created_at: str
+
+class RoomPlayersResponse(BaseModel):
+    room_id: str
+    join_code: str
+    status: str
+    players: List[PlayerInRoom]
+    total_players: int
+
+class StartRoomResponse(BaseModel):
+    success: bool
+    message: str
+    room_id: str
+    started_at: str
+    players_started: int
